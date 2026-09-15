@@ -24,10 +24,31 @@ entire listing, and `name`, `description`, `repository` and `homepage` are read
 straight from `package.json` — which is why those fields are worth getting right
 at publish time rather than after.
 
-⚠️ **npm's SEARCH index lags the registry by longer than the registry lags the
-publish.** A package is installable before it is findable by keyword, and the
-crawl reads the search index — so the wait is the search index's, not the
-directory's.
+### When it actually appears — two jobs, and only one of them can add you
+
+Read from `.github/workflows/` and `scripts/update-integrations.mjs`:
+
+| Job | Schedule | Flag | What it does |
+|---|---|---|---|
+| `nightly.yaml` | `0 10 * * *` — **daily 10:00 UTC** | none | `safeUpdateExistingIntegrations()` — refreshes entries **already in the catalogue**. Commits straight to `main`. **It cannot add you.** |
+| `weekly.yaml` | `0 12 * * Mon` — **Mondays 12:00 UTC** | `--unsafe` | `unsafeUpdateAllIntegrations()` — searches npm by keyword, filters the blocklist, **adds new integrations**. Opens a **Pull Request**. |
+
+The script says so in its own comment: *"only fetch unsafe changes like new and
+deprecated integrations … if the `--unsafe` CLI flag was provided"*.
+
+🔴 **So a new package appears only via the Monday job, and only after a withastro
+maintainer merges the bot's PR.** The daily job is not a faster path; it is a
+different one. Expect roughly a week, plus a human.
+
+⚠️ **npm's SEARCH index lags the registry**: a package is installable before it
+is findable by keyword, and the crawl reads the search index.
+
+🔑 **Ranking does not matter.** Measured 15-09-2026: `@ciphera-net/pulse-astro`
+sat at position **991 of 998** in `keywords:astro-integration` — last, because it
+is new and has no downloads. `unsafeUpdateAllIntegrations()` pages the **whole**
+result set, so a bottom rank is not a problem. Do not read "not in the first page
+of npm search" as "not indexed": query the index for the package by name and read
+back its `keywords` instead.
 
 **A logo is the one optional extra**, and it is a real PR, not a link: all 118
 overrides use a **repo-local** path (`/assets/integrations/<name>.svg`) and
