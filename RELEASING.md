@@ -6,8 +6,34 @@ review and no fee**. It is a weekly crawl of npm for packages carrying the
 `description`, `repository` and `homepage` straight from `package.json`. So
 **publishing to npm IS the listing** — there is nothing else to submit.
 
-A custom logo or an overridden description is the one curated part: open an
-issue at `withastro/astro.build` (or PR `scripts/integrations.json`). Optional.
+### How the directory actually decides — read from its own config, 15-09-2026
+
+`raw.githubusercontent.com/withastro/astro.build/main/scripts/integrations.json`
+is the whole mechanism, and it is worth knowing rather than guessing:
+
+| Key | What it does | Us |
+|---|---|---|
+| `keywords` | `astro-component`, `withastro`, `astro-integration` — a package needs one to be crawled at all | we carry **all three** ✅ |
+| `categories` | `analytics` is keyed on the `analytics` keyword | we carry it → **Analytics** category ✅ |
+| `blocklist` | 56 packages excluded by hand | we are **not** on it ✅ |
+| `overrides` | 118 entries, per-package `image` / `description` / `homepageUrl` / `repoUrl` | none needed |
+| `featured` | 18 hand-picked packages | not ours to ask for |
+
+**So there is nothing to submit.** Publishing with the right keywords is the
+entire listing, and `name`, `description`, `repository` and `homepage` are read
+straight from `package.json` — which is why those fields are worth getting right
+at publish time rather than after.
+
+⚠️ **npm's SEARCH index lags the registry by longer than the registry lags the
+publish.** A package is installable before it is findable by keyword, and the
+crawl reads the search index — so the wait is the search index's, not the
+directory's.
+
+**A logo is the one optional extra**, and it is a real PR, not a link: all 118
+overrides use a **repo-local** path (`/assets/integrations/<name>.svg`) and
+**zero** point at an external URL, so it means contributing the SVG file itself
+to `withastro/astro.build`. Blocked on Pulse having a vector mark — there is
+none yet, only the 64 px PNG on the CDN.
 
 ## 🔴 Publish to BOTH registries
 
