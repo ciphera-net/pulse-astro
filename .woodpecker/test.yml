@@ -1,0 +1,38 @@
+# Runs on pull_request AND on push to main.
+#
+# 🔴 `when: event: pull_request` alone is NOT a gate on main — warden shipped
+# nine checks that only ever ran against proposals, never against the article
+# (05-09-2026). Both events, every time.
+when:
+  - event: pull_request
+  - event: push
+    branch: main
+
+labels:
+  runner: k8s
+
+steps:
+  - name: test
+    image: node:22
+    commands:
+      # `npm ci` and not `npm install`: a stale node_modules invents a baseline
+      # that neither CI nor another machine shares.
+      - npm ci
+      - npm run typecheck
+      # A zero-test run exits 0 on some vitest versions, so the count is
+      # asserted rather than trusted. A FLOOR, not an equality — adding tests
+      # must never redden the build.
+      - npm test
+      - |
+        COUNT=$(npx vitest run --reporter=json --outputFile=/tmp/vitest.json >/dev/null 2>&1; \
+                node -e "try{const r=require('/tmp/vitest.json');console.log(r.numTotalTests||0)}catch(e){console.log(0)}")
+        echo "vitest collected $COUNT test(s)"
+        [ "$COUNT" -ge 19 ] || { echo "REFUSING: expected at least 19 tests, collected $COUNT — the suite shrank or stopped being collected"; exit 1; }
+      - npm run build
+      # The published package must stay dependency-free. A runtime dependency
+      # here lands in every consumer's site, and this package exists to add
+      # under 3 KB to a page.
+      - |
+        DEPS=$(node -e "const p=require('./package.json');console.log(Object.keys(p.dependencies||{}).length)")
+        echo "runtime dependencies: $DEPS"
+        [ "$DEPS" -eq 0 ] || { echo "REFUSING: @ciphera-net/astro-pulse must have zero runtime dependencies, found $DEPS"; exit 1; }
