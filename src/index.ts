@@ -5,9 +5,9 @@ export type { PulseOptions }
 export { SCRIPT_URL, COMPANION_URL, normalizeDomain, isValidDomain, hostnameFromSite } from "./pulse.js"
 
 /**
- * Pulse — privacy-first analytics for Astro.
+ * Pulse Analytics — privacy-first web analytics for Astro.
  *
- *   import pulse from "@ciphera-net/astro-pulse"
+ *   import pulse from "@ciphera-net/pulse-astro"
  *   export default defineConfig({
  *     site: "https://example.com",
  *     integrations: [pulse()],
@@ -17,7 +17,7 @@ export { SCRIPT_URL, COMPANION_URL, normalizeDomain, isValidDomain, hostnameFrom
  */
 export default function pulse(options: PulseOptions = {}): AstroIntegration {
   return {
-    name: "@ciphera-net/astro-pulse",
+    name: "@ciphera-net/pulse-astro",
     hooks: {
       "astro:config:setup": ({ command, config, injectScript, logger }) => {
         // The tracker has no localhost guard, so a dev server would send real

@@ -1,4 +1,4 @@
-# Releasing @ciphera-net/astro-pulse
+# Releasing @ciphera-net/pulse-astro
 
 The Astro directory (`astro.build/integrations`) has **no submission form, no
 review and no fee**. It is a weekly crawl of npm for packages carrying the
@@ -42,57 +42,43 @@ rm -f "$NPMRC"
 Never put a token on a command line; write it to a `umask 077` file and delete
 it afterwards.
 
-## Publish state (15-09-2026)
+## Published (15-09-2026)
 
-| Registry | State |
-|---|---|
-| **GitHub Packages** | ✅ **1.0.0 published.** `npm view … --registry=https://npm.pkg.github.com` → `1.0.0`. |
-| **public npmjs** | ⛔ **Blocked.** Still 404. This is the one the Astro directory crawls. |
+`@ciphera-net/pulse-astro` is live on **both** registries. Confirm a release
+against each one explicitly — a single `npm view` answers from whichever registry
+the scope happens to be mapped to.
 
-### What published to GitHub Packages
+### ⏳ npmjs takes about four minutes to become readable
 
-`NODE_AUTH_TOKEN` in the workspace `.env` is a GitHub PAT (`ghp_`) carrying
-`repo, workflow, write:packages` — enough, and it worked first try.
+A successful `npm publish` prints `+ @ciphera-net/pulse-astro@1.0.0` and exits 0
+**before the packument is fetchable**. Measured on 15-09-2026: `GET
+registry.npmjs.org/@ciphera-net%2fpulse-astro` returned **404 for 220 seconds**
+and 200 at **t+240s** — and an *authenticated* read 404s just the same, so it is
+not a public-CDN artefact. **Do not read an early 404 as a failed publish.** Poll
+for a few minutes before concluding anything.
 
-### Why npmjs is blocked
+### 🔴 A granular token cannot unpublish
 
-`NPMJS_TOKEN` in `.env` is a **granular** npm token scoped to specific existing
-packages. The evidence, because "404" reads like the wrong thing:
+`npm unpublish` returns, verbatim:
 
-- `npm whoami` → `uz1mani` — it authenticates.
-- `npm token list` → `Publish token npm_xWQY… created 2026-07-10` — it is typed
-  as a publish token.
-- `npm publish` → `404 Not Found - PUT .../@ciphera-net%2fastro-pulse`.
-- `npm org ls ciphera-net` and `npm access list packages` → **403**.
+> `403 Forbidden - DELETE … Granular access tokens that bypass two-factor
+> authentication may not perform this action.`
 
-A 404 on PUT alongside a working `whoami` is the signature of a **package-scoped
-token**, not a wrong password. `uz1mani` **is** a maintainer of
-`@ciphera-net/tessera` on npmjs, so the ACCOUNT can publish into the scope —
-this TOKEN cannot create a new package in it.
+`npm deprecate` **does** work with the same token. So a granular token can
+publish and deprecate but never delete; removing a package needs 2FA, i.e. the
+npm website or a classic token. Same shape on GitHub Packages, which answers
+`You need at least delete:packages and read:packages scopes` — the estate's
+`NODE_AUTH_TOKEN` carries only `write:packages`.
 
-### Where the CI tokens live, and which one is missing
+### The name was `astro-pulse` first
 
-Measured against the Woodpecker API:
-
-| Secret | Scope | Events | Registry |
-|---|---|---|---|
-| `npm_token` | **org** (`ciphera-net`, org id 2) | manual, push, tag | GitHub Packages |
-| `npmjs_token` | **repo `tessera-ts` only** (repo id 14) | manual, tag | public npmjs |
-
-So the npmjs publish token exists in CI but is **not visible to this repo**
-(Woodpecker id 68). Two ways forward, cheapest first:
-
-1. Add `npmjs_token` to pulse-astro's repo secrets (events: `tag`), then tag a
-   release. ⚠️ **It may be the same package-scoped token as `.env`'s** — tessera
-   publishes an *existing* package, which a package-scoped token can do, so this
-   has never been exercised against a NEW package name. If the tag run 404s the
-   same way, it is option 2.
-2. Issue an npm granular token with write on the **whole `@ciphera-net` scope**
-   ("All packages" works too), set it as `npmjs_token` on this repo, and replace
-   `NPMJS_TOKEN` in `.env` so local publishes work as well.
-
-Vault has not been searched for an existing scope-wide token — it needs a
-Teleport session and `tsh login` cannot run without a terminal.
+1.0.0 shipped briefly as `@ciphera-net/astro-pulse` before being renamed to match
+the repo and the estate's `pulse-*` convention. The old name is **deprecated** on
+npmjs pointing at this one, and awaits deletion by the owner on both registries.
+🔑 **It matters that it is deleted, not merely deprecated**: astro.build's
+directory crawls npm for the `astro-integration` keyword, and the old package
+still carries it — left in place, the directory would list **two** Pulse
+Analytics integrations.
 
 ## Release steps
 
@@ -105,7 +91,7 @@ Teleport session and `tsh login` cannot run without a terminal.
    `package.json` — nothing else. `prepack` rebuilds `dist/`, which is
    gitignored, so a fresh clone cannot ship an empty package.
 5. Publish to both registries (above).
-6. Confirm: `npm view @ciphera-net/astro-pulse version` against **each** registry
+6. Confirm: `npm view @ciphera-net/pulse-astro version` against **each** registry
    explicitly. A single `npm view` answers from whichever registry the scope is
    mapped to and will happily report the other one's version.
 7. The astro.build listing follows within about a week, on its own.

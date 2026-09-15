@@ -1,7 +1,7 @@
 {
-  "name": "@ciphera-net/astro-pulse",
-  "version": "1.0.0",
-  "description": "Add Pulse privacy-first analytics to an Astro site with one integration. No cookies, no personal data, under 3 KB.",
+  "name": "@ciphera-net/pulse-astro",
+  "version": "1.0.1",
+  "description": "Add Pulse Analytics \u2014 privacy-first web analytics \u2014 to an Astro site with one integration. No cookies, no personal data, under 3 KB.",
   "type": "module",
   "license": "Apache-2.0",
   "homepage": "https://pulse.ciphera.net",

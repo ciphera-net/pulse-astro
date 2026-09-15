@@ -35,4 +35,4 @@ steps:
       - |
         DEPS=$(node -e "const p=require('./package.json');console.log(Object.keys(p.dependencies||{}).length)")
         echo "runtime dependencies: $DEPS"
-        [ "$DEPS" -eq 0 ] || { echo "REFUSING: @ciphera-net/astro-pulse must have zero runtime dependencies, found $DEPS"; exit 1; }
+        [ "$DEPS" -eq 0 ] || { echo "REFUSING: @ciphera-net/pulse-astro must have zero runtime dependencies, found $DEPS"; exit 1; }
