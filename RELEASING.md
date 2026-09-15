@@ -56,6 +56,51 @@ overrides use a **repo-local** path (`/assets/integrations/<name>.svg`) and
 to `withastro/astro.build`. Blocked on Pulse having a vector mark — there is
 none yet, only the 64 px PNG on the CDN.
 
+## 📍 Follow-up tracker — where this integration is listed
+
+State captured **15-09-2026 22:0x UTC**. Check the listing PR with:
+
+```bash
+gh pr view 136 --repo one-aalam/awesome-astro --json state,mergeable,mergeStateStatus
+```
+
+| # | Where | State | Done looks like | If it stalls |
+|---|---|---|---|---|
+| 1 | **npmjs** | ✅ `1.0.1` | n/a | n/a |
+| 2 | **GitHub Packages** | ✅ `1.0.1` | n/a | n/a |
+| 3 | **npm keyword index** | ✅ present under `astro-integration` (page 750 of 998) and `withastro` (750 of 840) | n/a | ⚠️ `astro-component` returns **1016** results and only 1000 are reachable by paging, so absence there is **inconclusive, not negative**. It does not matter: the crawl matches ANY of the three |
+| 4 | **astro.build/integrations** | ⏳ 0 occurrences in the catalogue | our entry appears after the Monday job's PR is merged | 🔴 **Only `weekly.yaml` (Mon 12:00 UTC, `--unsafe`) can add a NEW package**, and a withastro maintainer must merge its PR. `nightly.yaml` only refreshes existing entries. **Earliest 21-09-2026.** If Monday's PR does not include us, *that* is the signal something is wrong |
+| 5 | [`one-aalam/awesome-astro#136`](https://github.com/one-aalam/awesome-astro/pull/136) | OPEN, MERGEABLE/**CLEAN**, +1/-0 | merged into `## Astro Integrations` | Nothing blocks it — 941 stars, 7 merged PRs in the last six months, no CONTRIBUTING.md and no stated rules. Purely maintainer attention |
+
+### Surfaces checked and deliberately NOT used
+
+Recorded so the search is not repeated:
+
+- **`withastro/astro` and `withastro/docs` host no community list.** The docs
+  defer outward: *"You can find many integrations developed by the community in
+  the Astro Integrations Directory."* Nothing to submit there.
+- **`astro.build/showcase` is sites-only** — built-with-Astro websites, not
+  libraries. Wrong content type.
+- **AstroThemes.dev / ThemeForest** are theme marketplaces. Wrong content type.
+- **`RichLewis007/awesome-astro-integrations`** — has a real `CONTRIBUTING.md`
+  and an `SEO & Analytics` section, but **8 stars and one merged PR in six
+  months**. Judged not worth the submission; revisit if it grows.
+- **`rajasegar/awesome-astro`** (5 stars, last pushed 2021) and
+  **`BryceRussell/my-awesome-astro`** (32 stars, last pushed 2023) are stale.
+- **`trueberryless-org/awesome-starlight`** is scoped to Starlight plugins, not
+  general Astro integrations. Not applicable.
+
+📍 **One owner action, optional:** Astro's community announces new integrations
+in the **`#showcase`** channel of the official Discord (`astro.build/chat` →
+`discord.gg/grF4GTXXYm`). Informal, no review. Astro's monthly "What's new" blog
+roundups have picked integrations up from there editorially, so it is the one
+remaining surface with real upside — and it needs a human with a Discord account.
+
+🔑 **How the extra surfaces were found, since this generalises:** read what the
+*official* listing page links OUT to. That is how `awesome-docusaurus` surfaced
+for the Docusaurus plugin, and it is the cheap move to repeat for GTM, Framer,
+Drupal, Joomla, TYPO3 and Odoo after each is published.
+
 ## 🔴 Publish to BOTH registries
 
 `npm routes a registry per SCOPE, never per package.` Every Ciphera frontend's
