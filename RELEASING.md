@@ -42,21 +42,57 @@ rm -f "$NPMRC"
 Never put a token on a command line; write it to a `umask 077` file and delete
 it afterwards.
 
-## ⛔ Known blocker (15-09-2026)
+## Publish state (15-09-2026)
 
-`NPMJS_TOKEN` in the workspace `.env` is a **granular** token. `npm whoami`
-returns `uz1mani` and `npm token list` types it "Publish", but it is scoped to
-specific existing packages: every account-level call 403s
-(`npm org ls`, `npm access list packages`) and publishing a **new** package name
-returns `404 Not Found - PUT .../@ciphera-net%2fastro-pulse`. A 404 on PUT with a
-working `whoami` is the signature of a package-scoped token, not a wrong password.
+| Registry | State |
+|---|---|
+| **GitHub Packages** | ✅ **1.0.0 published.** `npm view … --registry=https://npm.pkg.github.com` → `1.0.0`. |
+| **public npmjs** | ⛔ **Blocked.** Still 404. This is the one the Astro directory crawls. |
 
-`uz1mani` **is** the maintainer of `@ciphera-net/tessera` on npmjs, so the
-account can publish into the scope — only this token cannot create a new package
-in it.
+### What published to GitHub Packages
 
-**To unblock:** issue an npm granular access token with write access to the whole
-`@ciphera-net` scope (or "All packages"), and replace `NPMJS_TOKEN` in `.env`.
+`NODE_AUTH_TOKEN` in the workspace `.env` is a GitHub PAT (`ghp_`) carrying
+`repo, workflow, write:packages` — enough, and it worked first try.
+
+### Why npmjs is blocked
+
+`NPMJS_TOKEN` in `.env` is a **granular** npm token scoped to specific existing
+packages. The evidence, because "404" reads like the wrong thing:
+
+- `npm whoami` → `uz1mani` — it authenticates.
+- `npm token list` → `Publish token npm_xWQY… created 2026-07-10` — it is typed
+  as a publish token.
+- `npm publish` → `404 Not Found - PUT .../@ciphera-net%2fastro-pulse`.
+- `npm org ls ciphera-net` and `npm access list packages` → **403**.
+
+A 404 on PUT alongside a working `whoami` is the signature of a **package-scoped
+token**, not a wrong password. `uz1mani` **is** a maintainer of
+`@ciphera-net/tessera` on npmjs, so the ACCOUNT can publish into the scope —
+this TOKEN cannot create a new package in it.
+
+### Where the CI tokens live, and which one is missing
+
+Measured against the Woodpecker API:
+
+| Secret | Scope | Events | Registry |
+|---|---|---|---|
+| `npm_token` | **org** (`ciphera-net`, org id 2) | manual, push, tag | GitHub Packages |
+| `npmjs_token` | **repo `tessera-ts` only** (repo id 14) | manual, tag | public npmjs |
+
+So the npmjs publish token exists in CI but is **not visible to this repo**
+(Woodpecker id 68). Two ways forward, cheapest first:
+
+1. Add `npmjs_token` to pulse-astro's repo secrets (events: `tag`), then tag a
+   release. ⚠️ **It may be the same package-scoped token as `.env`'s** — tessera
+   publishes an *existing* package, which a package-scoped token can do, so this
+   has never been exercised against a NEW package name. If the tag run 404s the
+   same way, it is option 2.
+2. Issue an npm granular token with write on the **whole `@ciphera-net` scope**
+   ("All packages" works too), set it as `npmjs_token` on this repo, and replace
+   `NPMJS_TOKEN` in `.env` so local publishes work as well.
+
+Vault has not been searched for an existing scope-wide token — it needs a
+Teleport session and `tsh login` cannot run without a terminal.
 
 ## Release steps
 
@@ -92,5 +128,13 @@ Widening that range means running that check again, not editing the string.
 
 A `publish.yml` referencing a secret that does not exist would **halt the whole
 pipeline, `test` included** — a missing secret is a pipeline-level error in
-Woodpecker, not a step-level one, and zero steps run. Add the secret first, then
-the pipeline. Woodpecker repo id is **68**.
+Woodpecker, not a step-level one, and zero steps run. Woodpecker validates every
+referenced secret **against the event**, which is also what made tessera-ts's
+`when: manual` clause dead: it referenced `build_cache_key`, an org secret not
+allowed on `manual`, and the whole config failed.
+
+So: add `npmjs_token` to repo **68** first, then copy
+`Tessera/tessera-ts/.woodpecker/publish.yml` — it is the worked example, with a
+step per registry, `test -n "$NODE_AUTH_TOKEN"` guards that fail loudly when a
+secret is not injected, and an idempotent publish that tolerates a re-tag.
+Release by **tagging**, not by a manual trigger.
