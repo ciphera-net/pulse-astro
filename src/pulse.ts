@@ -85,7 +85,7 @@ export function resolveDomain(
     const d = normalizeDomain(options.domain)
     if (!isValidDomain(d)) {
       throw new Error(
-        `[astro-pulse] "${options.domain}" is not a valid domain. Pass the hostname your site is registered under in Pulse, e.g. domain: "example.com".`,
+        `[pulse-astro] "${options.domain}" is not a valid domain. Pass the hostname your site is registered under in Pulse, e.g. domain: "example.com".`,
       )
     }
     return { domain: d, source: "option" }
@@ -113,7 +113,7 @@ export function resolveDomain(
  */
 export function buildBootstrap(domain: string | null, options: PulseOptions = {}): string {
   if (domain !== null && !isValidDomain(domain)) {
-    throw new Error(`[astro-pulse] refusing to inject an invalid domain: ${domain}`)
+    throw new Error(`[pulse-astro] refusing to inject an invalid domain: ${domain}`)
   }
   const lines: string[] = ["(function(){", "var d=document,h=d.head||d.documentElement;if(!h)return;"]
 
