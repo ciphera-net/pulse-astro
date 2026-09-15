@@ -83,7 +83,11 @@ tracker behaving correctly. Safari is the easiest browser to verify an install i
 
 ## Licence
 
-Apache-2.0. This package has **zero runtime dependencies**, asserted in CI.
+Copyright 2026 Ciphera BV. Licensed under the Apache License, Version 2.0 —
+the `LICENSE` file is the licence text verbatim, so the copyright line lives
+here rather than inside it.
+
+This package has **zero runtime dependencies**, asserted in CI.
 
 Astro is a trademark of its owners; this is an independent integration and is not
 affiliated with or endorsed by the Astro project.
