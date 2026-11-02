@@ -118,10 +118,27 @@ the registry they were pointed at.
 `npm publish` goes to the WRONG registry.** Always pass `--registry` and an
 explicit `--userconfig`.
 
+🔑 **Use `CIPHERA_SCOPE_NPMJS_TOKEN`.** `.env` holds three npm tokens and only
+that one can write to this scope. Measured 02-11-2026 releasing 1.0.2:
+publishing with `NPMJS_TOKEN` failed `E404`, and that token no longer
+authenticates at all (`npm whoami` answers 401). The one call that separates
+them, **run it first**:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' \
+  -H "Authorization: Bearer $TOKEN" \
+  https://registry.npmjs.org/-/org/ciphera-net/user
+# 200 = CIPHERA_SCOPE_NPMJS_TOKEN   401 or 403 = a token that cannot publish here
+```
+
+⚠️ The GitHub Packages leg needs a **classic** token with `write:packages`.
+`.env` holds none: the `gh` token and the fine-grained `GITHUB_RELEASE_TOKEN`
+cannot publish there, so 1.0.2 went to npmjs only.
+
 ```bash
 # 1. public npmjs — this is the one the Astro directory crawls
 umask 077; NPMRC=$(mktemp)
-printf '//registry.npmjs.org/:_authToken=%s\n@ciphera-net:registry=https://registry.npmjs.org/\n' "$NPMJS_TOKEN" > "$NPMRC"
+printf '//registry.npmjs.org/:_authToken=%s\n@ciphera-net:registry=https://registry.npmjs.org/\n' "$CIPHERA_SCOPE_NPMJS_TOKEN" > "$NPMRC"
 npm publish --registry=https://registry.npmjs.org --access public --userconfig "$NPMRC"
 
 # 2. GitHub Packages — so the estate can install it
