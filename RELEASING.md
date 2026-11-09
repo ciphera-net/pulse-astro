@@ -142,7 +142,7 @@ printf '//registry.npmjs.org/:_authToken=%s\n@ciphera-net:registry=https://regis
 npm publish --registry=https://registry.npmjs.org --access public --userconfig "$NPMRC"
 
 # 2. GitHub Packages — so the estate can install it
-printf '//npm.pkg.github.com/:_authToken=%s\n@ciphera-net:registry=https://npm.pkg.github.com/\n' "$GH_NPM_WRITE_TOKEN" > "$NPMRC"
+printf '//npm.pkg.github.com/:_authToken=%s\n@ciphera-net:registry=https://npm.pkg.github.com/\n' "$GITHUB_PACKAGES_WRITE_TOKEN" > "$NPMRC"
 npm publish --registry=https://npm.pkg.github.com --userconfig "$NPMRC"
 
 rm -f "$NPMRC"
@@ -150,6 +150,12 @@ rm -f "$NPMRC"
 
 Never put a token on a command line; write it to a `umask 077` file and delete
 it afterwards.
+
+Pack once and publish that same file to both registries (`npm pack`, then `npm publish ./<file>.tgz` with each
+`--registry`), so both serve identical bytes. The GitHub Packages half needs `.env` `GITHUB_PACKAGES_WRITE_TOKEN`
+(classic, `write:packages` only, expires 2027-11-08 23:00 UTC). `GITHUB_NPM_READ_TOKEN` and the fine-grained
+release token cannot publish there, which is why the GitHub Packages copies lagged one version until
+09-11-2026.
 
 ## Published (15-09-2026)
 
