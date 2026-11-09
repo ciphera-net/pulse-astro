@@ -1,7 +1,7 @@
 {
   "name": "@ciphera-net/pulse-astro",
-  "version": "1.0.2",
-  "description": "Add Pulse Analytics \u2014 privacy-first web analytics \u2014 to an Astro site with one integration. No cookies, no IP addresses stored, under 3 KB.",
+  "version": "1.0.3",
+  "description": "Pulse Analytics adds privacy-first web analytics to an Astro site with one integration. It sets no cookies and never stores IP addresses, and the script it adds to your pages is under 3 KB.",
   "type": "module",
   "license": "Apache-2.0",
   "homepage": "https://pulse.ciphera.net",
