@@ -32,7 +32,7 @@ steps:
       - npm run build
       # The published package must stay dependency-free. A runtime dependency
       # here lands in every consumer's site, and this package exists to add
-      # under 3 KB to a page.
+      # about 3 KB to a page.
       - |
         DEPS=$(node -e "const p=require('./package.json');console.log(Object.keys(p.dependencies||{}).length)")
         echo "runtime dependencies: $DEPS"
