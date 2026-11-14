@@ -2,7 +2,7 @@
 
 This integration adds privacy-first analytics to an Astro site. Pulse Analytics
 sets no cookies and never stores IP addresses, and the script it adds to your
-pages is under 3 KB.
+pages is about 3 KB.
 
 [Pulse Analytics](https://pulse.ciphera.net) is built by [Ciphera](https://ciphera.net), a
 company in Belgium, and hosted in Switzerland.
@@ -42,12 +42,11 @@ plan is enough to start.
 | Option | Default | What it does |
 |---|---|---|
 | `domain` | from `site` | The domain your site is registered under in Pulse Analytics. Pass this when `site` is not the domain you track, for example on a preview deployment. |
-| `companion` | `false` | Also record clicks, copies and form submits. This loads a second, separate script (see below). |
 | `api` | unset | Route events through your own proxy origin. Enter the origin only (`https://example.com`), without a path, because the tracker adds its own. |
 | `injectInDev` | `false` | Inject during `astro dev` too. This is off by default (see below). |
 
 ```js
-pulse({ domain: "example.com", companion: true })
+pulse({ domain: "example.com" })
 ```
 
 ## Three things worth knowing
@@ -58,9 +57,11 @@ prints a line saying it stayed out; in Astro 7 the dev server is daemonised, so
 that line is in `astro dev logs` rather than your terminal. Set
 `injectInDev: true` if you want the tracker to run in dev.
 
-**The interaction capture is a second request on purpose.** The core script's
-size is a published claim, and nothing gets folded into it to make a feature
-look free. `companion: true` costs you a second, separate file.
+**What the script records is a setting in Pulse.** Scroll depth,
+outbound links, file downloads, and clicks, copies and form submits are each
+switched on or off in your site's settings in Pulse (Settings → General). The tag
+stays the same, so there is nothing to change here. The old `companion` option
+has been ignored since 1.1.0 and logs one line when it is set.
 
 **View-source shows a bootstrap instead of a `<script src>` tag.** Astro's
 `injectScript` takes JavaScript rather than HTML, so there is no way to ask it

@@ -103,10 +103,12 @@ describe("buildBootstrap", () => {
     expect(js).not.toContain(COMPANION_URL)
   })
 
-  it("adds the companion as a SECOND request, never folded into the core", () => {
+  it("ignores the deprecated companion option and still emits one script", () => {
     const js = buildBootstrap("example.com", { companion: true })
     expect(js).toContain(SCRIPT_URL)
-    expect(js).toContain(COMPANION_URL)
+    expect(js).not.toContain(COMPANION_URL)
+    expect(js).not.toContain("data-no-")
+    expect(js).not.toContain("data-ignore-")
   })
 
   it("sets pulseConfig.api before any script is appended", () => {
@@ -141,11 +143,10 @@ describe("the bootstrap, executed", () => {
     expect(s!.hasAttribute("data-domain")).toBe(false)
   })
 
-  it("puts the core first and gives the companion no data-domain", () => {
-    const [core, companion] = run(buildBootstrap("example.com", { companion: true }))
-    expect(core!.src).toBe(SCRIPT_URL)
-    expect(companion!.src).toBe(COMPANION_URL)
-    expect(companion!.hasAttribute("data-domain")).toBe(false)
+  it("appends exactly one script even when the deprecated companion option is set", () => {
+    const scripts = run(buildBootstrap("example.com", { companion: true }))
+    expect(scripts).toHaveLength(1)
+    expect(scripts[0]!.src).toBe(SCRIPT_URL)
   })
 
   it("assigns window.pulseConfig without clobbering an existing one", () => {

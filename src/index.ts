@@ -28,6 +28,12 @@ export default function pulse(options: PulseOptions = {}): AstroIntegration {
           return
         }
 
+        if (options.companion !== undefined) {
+          logger.warn(
+            "The companion option has been ignored since 1.1.0: switch it in your site's settings in Pulse.",
+          )
+        }
+
         // Throws on an explicitly supplied domain that cannot be a hostname.
         // A typo there is a silent no-data install, which is worth a build error.
         const { domain, source } = resolveDomain(options, config.site)
@@ -40,7 +46,7 @@ export default function pulse(options: PulseOptions = {}): AstroIntegration {
           )
         } else {
           logger.info(
-            `tracking ${domain} (from ${source === "option" ? "the domain option" : "`site`"})${options.companion ? ", with interaction capture" : ""}`,
+            `tracking ${domain} (from ${source === "option" ? "the domain option" : "`site`"})`,
           )
         }
       },
